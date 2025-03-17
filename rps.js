@@ -1,70 +1,93 @@
+// Function to get a random choice for the computer
 function getComputerChoice() {
-    const choices = ["Rock", "Paper", "Scissors"]
-    return choices[Math.floor(Math.random() * 3)]
+    const choices = ["Rock", "Paper", "Scissors"];
+    return choices[Math.floor(Math.random() * choices.length)];
 }
 
-function getHumanChoice() {
-    return prompt("Rock, Paper, Scissors?")
-}
+// Score tracking
+let humanScore = 0;
+let computerScore = 0;
 
-let humanScore = 0
-let computerScore = 0
+// Create a container for buttons and results
+const container = document.body;
 
-function playRound(humanChoice, computerChoice) {
-let human = humanChoice.toLowerCase();
-let computer = computerChoice.toLowerCase();
-let result = ""
+// Create a div to display results
+const resultDiv = document.createElement("div");
+resultDiv.style.marginTop = "20px";
+resultDiv.style.fontSize = "18px";
+resultDiv.style.fontWeight = "bold";
+resultDiv.style.padding = "10px";
+resultDiv.style.border = "2px solid black";
+resultDiv.style.width = "fit-content";
+resultDiv.textContent = "Make your choice!";
+container.appendChild(resultDiv);
 
-    if (human === computer ) {
-        result = ("Draw!");
-    }
-    else if (human === "rock" && computer === "paper" ) {
-        result = ("You lose! Paper beats Rock.");
-    }
-    else if (human === "rock" && computer === "scissors" ) {
-        result = ("You win! Rock beats Scissors.");
-    }
-    else if (human === "paper" && computer === "scissors" ) {
-        result = ("You lose! Scissors beats Paper.");
-    }
-    else if (human === "paper" && computer === "rock" ) {
-        result = ("You win! Paper beats Rock.");
-    }
-    else if (human === "scissors" && computer === "rock" ) {
-        result = ("You lose! Rock beats Scissors.");
-    }
-    else if (human === "scissors" && computer === "paper" ) {
-        result = ("You win! Scissors beats Paper.");
-    }
-    else {
-        result = ("Invalid entry!");
-    }
-    console.log(result);
-    return result;
-  }
-  
-  function playGame() {
-    for (let i = 0; i < 5; i++) {  
-        let humanSelection = getHumanChoice(); 
-        let computerSelection = getComputerChoice();
-        let result = playRound(humanSelection, computerSelection);  
+// Create a div to display the score
+const scoreDiv = document.createElement("div");
+scoreDiv.style.marginTop = "10px";
+scoreDiv.style.fontSize = "16px";
+scoreDiv.textContent = `Score - You: ${humanScore} | Computer: ${computerScore}`;
+container.appendChild(scoreDiv);
 
-        if (result.includes("win")) {
-            humanScore++;  
-        } else if (result.includes("lose")) {
-            computerScore++; 
+// Choices
+const choices = ["Rock", "Paper", "Scissors"];
+
+choices.forEach(choice => {
+    const button = document.createElement("button");
+    button.textContent = choice;
+    button.style.margin = "10px";
+    button.style.padding = "10px 20px";
+    button.style.fontSize = "16px";
+
+    // Add event listener to play a round and update the result
+    button.addEventListener("click", () => {
+        const computerChoice = getComputerChoice(); // ✅ Store computer choice once
+        console.log(`Computer chose: ${computerChoice}`); // Debugging line
+
+        const result = playRound(choice.toLowerCase(), computerChoice.toLowerCase());
+        resultDiv.textContent = result;
+        scoreDiv.textContent = `Score - You: ${humanScore} | Computer: ${computerScore}`;
+
+        // Check if there's a winner
+        if (humanScore === 5) {
+            resultDiv.textContent = "🎉 You win the game! 🎉";
+            disableButtons();
+        } else if (computerScore === 5) {
+            resultDiv.textContent = "💀 Computer wins the game! 💀";
+            disableButtons();
         }
-    }
+    });
+
+    container.appendChild(button);
+});
+
+// Function to disable buttons after the game ends
+function disableButtons() {
+    document.querySelectorAll("button").forEach(button => button.disabled = true);
 }
 
-playGame();
+// Function to play a single round
+function playRound(humanChoice, computerChoice) {
+    let result = "";
 
-  if (humanScore === computerScore) {
-    console.log("Draw! " + humanScore + "-" + computerScore)
-  }
-  else   if (humanScore > computerScore) {
-    console.log("You win! " + humanScore + "-" + computerScore)
-  }
-  else   if (humanScore < computerScore) {
-    console.log("You loose! " + computerScore + "-" + humanScore)
-  }
+    if (humanChoice === computerChoice) {
+        result = `It's a Draw! You both chose ${capitalize(humanChoice)}.`;
+    } else if (
+        (humanChoice === "rock" && computerChoice === "scissors") ||
+        (humanChoice === "paper" && computerChoice === "rock") ||
+        (humanChoice === "scissors" && computerChoice === "paper")
+    ) {
+        result = `You win! ${capitalize(humanChoice)} beats ${capitalize(computerChoice)}.`;
+        humanScore++; // ✅ Now correctly updates only when you win
+    } else {
+        result = `You lose! ${capitalize(computerChoice)} beats ${capitalize(humanChoice)}.`;
+        computerScore++; // ✅ Now correctly updates only when the computer wins
+    }
+
+    return result;
+}
+
+// Helper function to capitalize first letter
+function capitalize(word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+}
